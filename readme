@@ -1,0 +1,8 @@
+### Steps to run the code
+
+1. install dependencies from `requirements.txt`
+2. database config are in `app.db`
+4. run `python app/app.py`
+5. open in browser http://0.0.0.0:8000/gq to view gq editor
+
+### Database setup (mongodb)
