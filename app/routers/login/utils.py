@@ -1,5 +1,6 @@
 import jwt
 import pkgutil
+import requests
 from hashlib import sha256
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta
@@ -28,3 +29,26 @@ def generate_token(payload: dict):
         algorithm=JWT_ALGORITHM
     )
     return encoded, id
+
+def verify_decode_token(jwt_token):
+    return jwt.decode(jwt_token, public_key, algorithms=JWT_ALGORITHM,options={"verify_exp": False})
+
+def validate_facebook_token(token: str):
+    # clientId = FACEBOOK_CLIENT_ID
+    # clientSecret = FACEBOOK_SECRET
+    # clientId = '139487954713006'
+    # clientSecret = '27fad3ab556a4c1dac003e6828e1a146'
+    # appLink = 'https://graph.facebook.com/oauth/access_token?client_id=' + \
+    #     clientId + '&client_secret=' + clientSecret + '&grant_type=client_credentials'
+
+    # From appLink, retrieve the second accessToken: app access_token
+    # appToken = requests.get(appLink).json()['access_token']
+    # https://graph.facebook.com/me?fields=email&access_token=${token}
+    # link = 'https://graph.facebook.com/debug_token?input_token=' + \
+    #     token + '&access_token=' + appToken
+    link = 'https://graph.facebook.com/me?fields=email&access_token=' + token
+    try:
+        userId = requests.get(link).json()
+    except (ValueError, KeyError, TypeError) as error:
+        return error
+    return userId
