@@ -70,7 +70,6 @@ jobs:
         python-version: [3.8.9]
         appname: ["bulkHub"]
         deploy-group: ["bulkHubCodedeploy"]
-        s3-bucket: ["bulhhub-builds"]
 
     needs: buildAndTest
     steps:
