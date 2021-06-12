@@ -68,8 +68,8 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8.9]
-        appname: ["bulkhub"]
-        deploy-group: ["Awscodedeploy"]
+        appname: ["bulkHub"]
+        deploy-group: ["bulkHubCodedeploy"]
         s3-bucket: ["bulhhub-builds"]
 
     needs: buildAndTest
