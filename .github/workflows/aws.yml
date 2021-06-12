@@ -70,9 +70,8 @@ jobs:
         python-version: [3.8.9]
         appname: ["bulkHub"]
         deploy-group: ["bulkHubCodedeploy"]
-        s3-bucket: ["bulkHub-build"]
-        s3-filename: ["bulkHub-backend-build-${{ github.sha }}"]
-
+        s3-bucket: ["bulkhub-build"]
+        s3-filename: ["bulkhub-backend-build-${{ github.sha }}"]
 
     needs: buildAndTest
     steps:
@@ -111,7 +110,7 @@ jobs:
           --application-name ${{ matrix.appname }} \
           --description "This is a revision for the ${{ matrix.appname }}-${{ github.sha }}" \
           --ignore-hidden-files \
-          --s3-location s3://${{ matrix.s3-bucket }}/${{ matrix.s3-filename }}.zip \
+          --s3-location s3://${{ matrix.s3-bucket }}/${{ matrix.s3-filename }}.gz \
           --source .
       # Create deployment to CodeDeploy
       - name: AWS Create Deployment
@@ -121,4 +120,4 @@ jobs:
            --deployment-config-name CodeDeployDefault.OneAtATime \
            --deployment-group-name ${{ matrix.deploy-group }} \
            --file-exists-behavior OVERWRITE \
-           --s3-location bucket=${{ matrix.s3-bucket }},key=${{ matrix.s3-filename }}.zip,bundleType=zip \
+           --s3-location bucket=${{ matrix.s3-bucket }},key=${{ matrix.s3-filename }}.gz,bundleType=gz \
