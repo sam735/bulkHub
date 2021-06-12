@@ -1,123 +1,23 @@
-# This workflow will build and push a new container image to Amazon ECR,
-# and then will deploy a new task definition to Amazon ECS, when a release is created
-#
-# To use this workflow, you will need to complete the following set-up steps:
-#
-# 1. Create an ECR repository to store your images.
-#    For example: `aws ecr create-repository --repository-name my-ecr-repo --region us-east-2`.
-#    Replace the value of `ECR_REPOSITORY` in the workflow below with your repository's name.
-#    Replace the value of `aws-region` in the workflow below with your repository's region.
-#
-# 2. Create an ECS task definition, an ECS cluster, and an ECS service.
-#    For example, follow the Getting Started guide on the ECS console:
-#      https://us-east-2.console.aws.amazon.com/ecs/home?region=us-east-2#/firstRun
-#    Replace the values for `service` and `cluster` in the workflow below with your service and cluster names.
-#
-# 3. Store your ECS task definition as a JSON file in your repository.
-#    The format should follow the output of `aws ecs register-task-definition --generate-cli-skeleton`.
-#    Replace the value of `task-definition` in the workflow below with your JSON file's name.
-#    Replace the value of `container-name` in the workflow below with the name of the container
-#    in the `containerDefinitions` section of the task definition.
-#
-# 4. Store an IAM user access key in GitHub Actions secrets named `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
-#    See the documentation for each action used below for the recommended IAM policies for this IAM user,
-#    and best practices on handling the access key credentials.
-
-name: CI/CD
-
-on:
-  push:
-    branches:
-      - staging
-
-jobs:
-  buildAndTest:
-    name: CI Pipeline
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.8.9]
-
-    steps:
-      - uses: actions/checkout@v2
-
-      # Initialize Python
-      - name: Install Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      # Install project dependencies, test lint and build
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install flake8 pytest
-          pip install -r requirements.txt
-      - name: Lint with flake8
-        run: |
-          # stop the build if there are Python syntax errors or undefined names
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      - name: Test with pytest
-        run: pytest
-
-  deploy:
-    name: CD Pipeline
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.8.9]
-        appname: ["bulkHub"]
-        deploy-group: ["bulkHubCodedeploy"]
-        s3-bucket: ["bulkhub-build"]
-        s3-filename: ["bulkhub-backend-build-${{ github.sha }}"]
-
-    needs: buildAndTest
-    steps:
-      - uses: actions/checkout@v2
-
-      # Initialize Python
-      - name: Install Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      # Install project dependencies and build
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      # - name: Run build
-      #   run: npm run build
-
-      # Install AWS CLI 2
-      - name: Install AWS CLI 2
-        run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install --update
-      # Configure AWS credentials
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      # Deploy push to AWS S3
-      - name: AWS Deploy push
-        run: |
-          aws deploy push \
-          --application-name ${{ matrix.appname }} \
-          --description "This is a revision for the ${{ matrix.appname }}-${{ github.sha }}" \
-          --ignore-hidden-files \
-          --s3-location s3://${{ matrix.s3-bucket }}/${{ matrix.s3-filename }}.gz \
-          --source .
-      # Create deployment to CodeDeploy
-      - name: AWS Create Deployment
-        run: |
-          aws deploy create-deployment \
-           --application-name ${{ matrix.appname }} \
-           --deployment-config-name CodeDeployDefault.OneAtATime \
-           --deployment-group-name ${{ matrix.deploy-group }} \
-           --file-exists-behavior OVERWRITE \
-           --s3-location bucket=${{ matrix.s3-bucket }},key=${{ matrix.s3-filename }}.gz,bundleType=gz \
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /home/ubuntu/bulkHub
+permissions:
+  - object: /
+    owner: ubuntu
+    type:
+      - directory
+hooks:
+  ApplicationStop:
+    - location: scripts/application_stop/stop.sh
+  BeforeInstall:
+    - location: scripts/before_install/unzip.sh
+  AfterInstall:
+    - location: scripts/after_install/install_dependencies.sh
+  ApplicationStart:
+    - location: scripts/application_start/start_server.sh
+      timeout: 3600
+  ValidateService:
+    - location: scripts/validate_service/validate.sh
+      timeout: 3600
