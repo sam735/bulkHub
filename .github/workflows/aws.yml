@@ -70,6 +70,9 @@ jobs:
         python-version: [3.8.9]
         appname: ["bulkHub"]
         deploy-group: ["bulkHubCodedeploy"]
+        s3-bucket: ["bulkHub-build"]
+        s3-filename: ["bulkHub-backend-build-${{ github.sha }}"]
+
 
     needs: buildAndTest
     steps:
