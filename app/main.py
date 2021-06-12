@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers.login import login
 from routers.user import user
+from routers.seller import seller
 
 app = FastAPI()
 
@@ -34,4 +35,12 @@ app.include_router(
     tags=["users"],
     # dependencies=[Depends(get_token_header)],
     responses={404: {"description": "no users"}},
+)
+
+app.include_router(
+    seller.router,
+    prefix="/seller",
+    tags=["seller"],
+    # dependencies=[Depends(get_token_header)],
+    responses={404: {"description": "no seller"}},
 )

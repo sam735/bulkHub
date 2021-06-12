@@ -52,3 +52,21 @@ def update_user_detail(query,payload:Dict):
     }
     return db.user.update(query,update_dict)
 
+def create_seller(seller_dtails:Dict):
+    return db.seller.insert(seller_dtails)
+
+def get_seller(query:Dict):
+    return list(db.seller.find(query))
+
+def create_seller_address(address:Dict):
+    return db.seller_address.insert(address)
+
+def update_seller_address(query:Dict,payload:Dict):
+
+    update_dict = {
+        '$set':payload
+    }
+    return db.seller_address.update(query,update_dict)
+
+def get_seller_address(query):
+    return list(db.seller_address.find(query))
