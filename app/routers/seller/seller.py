@@ -9,6 +9,7 @@ from constant import SELLER_ROLES_NAME
 
 router = APIRouter()
 
+
 @router.post('/',response_model=CreateUserResponse)
 async def register_seller(seller_details:SellerRegistration,current_user = Depends(get_current_user)):
 
