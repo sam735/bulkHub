@@ -13,6 +13,7 @@ class Token(BaseModel):
 @router.post('/')
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     try:
+    
         user_to_login = get_user({'email':form_data.username})
         if user_to_login and check_password(form_data.password, user_to_login[0].get('hashPassword')):
             jwt,id = generate_token(
