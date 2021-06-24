@@ -1,7 +1,7 @@
 #!/bin/bash
 PROJECT_LOCATION=/home/ubuntu/bulkHub
-cp /home/ubuntu/.env $PROJECT_LOCATION/.env
-source $PROJECT_LOCATION/.env
+# cp /home/ubuntu/.env $PROJECT_LOCATION/.env
+# source $PROJECT_LOCATION/.env
 cd $PROJECT_LOCATION
 mkdir -p /home/ubuntu/logs
 sudo chown --recursive ubuntu: /home/ubuntu/logs
