@@ -27,9 +27,7 @@ async def create_user(user: User):
                                     )
             else:
                 _id = insert_user_details(
-                    {   'firstName':user.firstName,
-                        'lastName':user.lastName,
-                        'username':user.username,
+                    {   
                         'email':user.email.lower(),
                         'hashPassword':user.hash_password,
                         'role':Role(user.role).name

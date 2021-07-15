@@ -6,9 +6,6 @@ from schemas.pyobjectId import PyObjectId
 from schemas.address import Address
 
 class User(BaseModel):
-    firstName: str
-    lastName:str
-    username: str
     email: str
     password: str
     role: int = 1
@@ -43,14 +40,12 @@ class UpdateAddress(BaseModel):
     is_default:Optional[bool] = None
 
 class GetUser(BaseModel):
-    firstName: str
-    lastName:str
-    username: str
+    firstName: Optional[str]
+    lastName:Optional[str]
+    username: Optional[str]
     email: str
 
 class UpdateUser(BaseModel):
     firstName: Optional[str]
     lastName:Optional[str]
     username: Optional[str]
-    email: Optional[str]
-    role: Optional[int]

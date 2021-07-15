@@ -23,7 +23,7 @@ def generate_token(payload: dict):
         "jti": id,
         #    "aud": JWT_AUDIENCE, // TODO add this once you have the actual certiicate
         "iat": datetime.utcnow()
-        }
+    }
     encoded = jwt.encode(
         payload_with_claims, private_key,
         algorithm=JWT_ALGORITHM
