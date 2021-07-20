@@ -2,7 +2,7 @@ from schemas.address import Address
 from bson.objectid import ObjectId
 from schemas.user import CreateUserResponse
 from fastapi import APIRouter, Depends, HTTPException
-from routers.user.utils import get_current_user
+from routers.user.utils import is_seller
 from schemas.seller import SellerRegistration,UpdateSellerAddress,GetSeller
 from db import create_seller,get_seller,create_seller_address,update_seller_address,get_seller_address
 from constant import SELLER_ROLES_NAME
@@ -10,10 +10,8 @@ from constant import SELLER_ROLES_NAME
 router = APIRouter()
 
 @router.post('/',response_model=CreateUserResponse)
-async def register_seller(seller_details:SellerRegistration,current_user = Depends(get_current_user)):
+async def register_seller(seller_details:SellerRegistration,current_user = Depends(is_seller)):
 
-    if current_user.get('role').lower() != SELLER_ROLES_NAME:
-        raise HTTPException(status_code=422,detail='Invalid role')
     seller = get_seller({'phoneNo':seller_details.phoneNo})
     if seller:
         raise HTTPException(status_code=422,detail='there is seller associated with this phone no')
@@ -26,7 +24,7 @@ async def register_seller(seller_details:SellerRegistration,current_user = Depen
         raise HTTPException(status_code=500,detail=str(e))
 
 @router.post('/address')
-async def link_address(seller_adress:Address,current_user = Depends(get_current_user)):
+async def link_address(seller_adress:Address,current_user = Depends(is_seller)):
     try:
         seller = get_seller({'userId':current_user.get('id')})
         seller_adress = dict(seller_adress)
@@ -37,7 +35,7 @@ async def link_address(seller_adress:Address,current_user = Depends(get_current_
         raise HTTPException(status_code=500,detail=str(e))
 
 @router.patch('/address')
-async def edit_address(address_to_update:UpdateSellerAddress,current_user = Depends(get_current_user)):
+async def edit_address(address_to_update:UpdateSellerAddress,current_user = Depends(is_seller)):
     try:
         seller = get_seller({'userId':current_user.get('id')})
         address_to_update = dict(address_to_update)
@@ -48,18 +46,20 @@ async def edit_address(address_to_update:UpdateSellerAddress,current_user = Depe
         raise HTTPException(status_code=500,detail=str(e))
 
 @router.get('/',response_model=GetSeller)
-def seller_details(current_user = Depends(get_current_user)):
+def seller_details(current_user = Depends(is_seller)):
     try:
         seller = get_seller({'userId':current_user.get('id')})[0]
-        seller_address = get_seller_address({'seller_id':str(seller.get('_id'))})[0]
-        address = Address(
-            street = seller_address.get('street'),
-            line_1 = seller_address.get('line_1'),
-            line_2 = seller_address.get('line_2'),
-            city = seller_address.get('city'),
-            state = seller_address.get('state'),
-            zip = seller_address.get('zip'),
-            country = seller_address.get('country')
+        seller_address = get_seller_address({'seller_id':str(seller.get('_id'))})
+        address = None
+        if seller_address:
+            address = Address(
+                street = seller_address[0].get('street'),
+                line_1 = seller_address[0].get('line_1'),
+                line_2 = seller_address[0].get('line_2'),
+                city = seller_address[0].get('city'),
+                state = seller_address[0].get('state'),
+                zip = seller_address[0].get('zip'),
+                country = seller_address[0].get('country')
         )
         return GetSeller(sellerName = seller.get('sellerName'),BusinessName = seller.get('BusinessName'),
             phoneNo = seller.get('phoneNo'), address = address

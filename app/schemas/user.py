@@ -44,8 +44,10 @@ class GetUser(BaseModel):
     lastName:Optional[str]
     username: Optional[str]
     email: str
+    image_url:Optional[str]
 
 class UpdateUser(BaseModel):
     firstName: Optional[str]
     lastName:Optional[str]
     username: Optional[str]
+    image_url: Optional[str]

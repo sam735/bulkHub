@@ -45,7 +45,8 @@ async def get_user_details(current_user = Depends(get_current_user)):
             firstName = user_details.get('firstName'),
             lastName = user_details.get('lastName'),
             username = user_details.get('username'),
-            email = user_details.get('email')
+            email = user_details.get('email'),
+            image_url = user_details.get('image_url')
         )
     except Exception as e:
         raise HTTPException(status_code=500,detail=str(e))

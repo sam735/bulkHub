@@ -15,3 +15,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
             headers={"WWW-Authenticate": "Bearer"},
         )
     return {'id':user_id, 'role':roles}
+
+async def is_seller(current_user = Depends(get_current_user)):
+    if current_user.get('role') != 'seller':
+        raise HTTPException(
+            status_code=403,
+            detail="Invalid roles user need to be register as seller first",
+        )
+    return current_user

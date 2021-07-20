@@ -19,4 +19,4 @@ class GetSeller(BaseModel):
     sellerName: str
     BusinessName :str
     phoneNo:str
-    address:Address
+    address:Optional[Address]
