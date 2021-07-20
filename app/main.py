@@ -4,6 +4,7 @@ from routers.login import login
 from routers.user import user
 from routers.seller import seller
 from routers.upload import upload
+from routers.product import product
 
 app = FastAPI()
 
@@ -52,4 +53,12 @@ app.include_router(
     tags=["upload"],
     # dependencies=[Depends(get_token_header)],
     responses={404: {"description": "no upload"}},
+)
+
+app.include_router(
+    product.router,
+    prefix="/products",
+    tags=["products"],
+    # dependencies=[Depends(get_token_header)],
+    responses={404: {"description": "no products"}},
 )

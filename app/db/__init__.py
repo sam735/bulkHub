@@ -70,3 +70,22 @@ def update_seller_address(query:Dict,payload:Dict):
 
 def get_seller_address(query):
     return list(db.seller_address.find(query))
+
+def create_product_category_type(product_category_details:Dict):
+    return db.product_category.insert(product_category_details)
+
+def get_product_category():
+    return list(db.product_category.find())
+
+def get_each_product_category(query:Dict):
+    return list(db.product_category.find(query))
+
+def update_product_category(query:Dict, payload:Dict):
+
+    update_dict = {
+        '$set': payload
+    }
+    return db.product_category.update(query, update_dict)
+
+def delete_product_category(query:Dict):
+    return db.product_category.remove(query)
