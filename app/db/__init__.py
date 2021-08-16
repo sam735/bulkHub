@@ -5,8 +5,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 
 #db_url = "mongodb+srv://@{0}/bulkHub?retryWrites=true&w=majority".format(os.environ.get())
-
-client = MongoClient(os.environ.get('DB_URL'))
+client = MongoClient(os.environ.get('DB_URL').strip())
 db = client['bulkHub-db']
 
 def get_db():
