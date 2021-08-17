@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from routers.user.utils import is_seller
 from schemas.seller import SellerRegistration,UpdateSellerAddress,GetSeller
 from db import create_seller,get_seller,create_seller_address,update_seller_address,get_seller_address
-from datetime import datetime
 
 router = APIRouter()
 
@@ -18,7 +17,6 @@ async def register_seller(seller_details:SellerRegistration,current_user = Depen
     try:
         seller_details = dict(seller_details)
         seller_details['userId'] = current_user.get('id')
-        seller_details['createdAt'] = datetime.now()
         seller = create_seller(seller_details)
         return CreateUserResponse(id = str(seller),message='seller created successfully')
     except Exception as e:

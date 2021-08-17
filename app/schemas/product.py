@@ -9,6 +9,7 @@ class ProductcategoryAddition(BaseModel):
     productImageURL: Optional[str]
 
 class GetProductcategory(BaseModel):
+    id: str
     productName: str
     productType: str
     productImageURL: Optional[str]
@@ -16,7 +17,6 @@ class GetProductcategory(BaseModel):
 
 class GetProductCategoryList(BaseModel):
     items: List[GetProductcategory]
-    id: str
 
 class UpdateProductCategory(BaseModel):
     productName: Optional[str]

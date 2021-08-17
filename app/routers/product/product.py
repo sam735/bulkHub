@@ -11,12 +11,14 @@ router = APIRouter()
 @router.post('/')
 async def create_product_category(product_details: ProductcategoryAddition, current_user=Depends(is_seller)):
     try:
-        create_product_category_type({'productName': product_details.productName,
-                                      'productType': product_details.productType,
-                                      'createdAt': datetime.now(),
-                                      'productImageURL': product_details.productImageURL})
-        return {'message': 'product category created',
-                'id': str(id)}
+        id = create_product_category_type(
+            {
+                'productName': product_details.productName,
+                'productType': product_details.productType,
+                'productImageURL': product_details.productImageURL
+            }
+        )
+        return {'message': 'product category created','id': str(id)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -25,19 +27,24 @@ async def create_product_category(product_details: ProductcategoryAddition, curr
 async def list_product_category(current_user=Depends(is_seller)):
     try:
         product_category = get_product_category()
-        product_items = [GetProductcategory(productName=item.get('productName'),
-                                            productType=item.get('productType'),
-                                            productImageURL=item.get('productImageURL'),
-                                            createdAt=str(item.get('createdAt'))) for item in product_category]
-        return GetProductCategoryList(id=str(id), items=product_items)
+        product_items = [GetProductcategory(
+            id = str(item.get('_id')),
+            productName=item.get('productName'),
+            productType=item.get('productType'),
+            productImageURL=item.get('productImageURL'),
+            createdAt=str(item.get('createdAt'))
+        ) for item in product_category]
+        return GetProductCategoryList(items=product_items)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.patch('/')
 async def edit_product_category(product_category_id: str,
-                            product_type_to_update: UpdateProductCategory, current_user=Depends(is_seller)):
+                                product_type_to_update: UpdateProductCategory,
+                                current_user=Depends(is_seller)):
     try:
+        import pdb;pdb.set_trace()
         product_type_to_update = dict(product_type_to_update)
         product_type_to_update = {k: v for k, v in product_type_to_update.items() if v is not None}
         update_product_category({'_id': ObjectId(product_category_id)}, product_type_to_update)
