@@ -1,62 +1,67 @@
+from typing import Dict
 from fastapi import APIRouter, Depends, HTTPException
 from routers.user.utils import is_seller
-from schemas.product import ProductcategoryAddition, GetProductcategory, GetProductCategoryList, UpdateProductCategory
-from db import create_product_category_type, get_product_category, update_product_category, get_each_product_category, delete_product_category
-from datetime import datetime
 from bson.objectid import ObjectId
+from schemas.product import CreateProduct,DispalyProduct,ProductList,UpdateProduct
+from db import insert_product,get_product,get_each_product_category,update_product,delete_product
 
 router = APIRouter()
 
-
 @router.post('/')
-async def create_product_category(product_details: ProductcategoryAddition, current_user=Depends(is_seller)):
+async def create_product(product:CreateProduct,current_user=Depends(is_seller)):
     try:
-        id = create_product_category_type(
-            {
-                'productName': product_details.productName,
-                'productType': product_details.productType,
-                'productImageURL': product_details.productImageURL
-            }
-        )
-        return {'message': 'product category created','id': str(id)}
+        db_product = {
+            'product_name':product.product_name,
+            'product_category_id':product.product_category_id,
+            'seller_id':current_user.get('id'),
+            'max_available_quantity_in_kg':product.max_available_quantity_in_kg,
+            'Price_per_kg':product.Price_per_kg
+        }
+        id = insert_product(db_product)
+        return {'message':'product created successfully','id':str(id)}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500,detail=str(e))
 
-
-@router.get('/', response_model=GetProductCategoryList)
-async def list_product_category(current_user=Depends(is_seller)):
+@router.get('/',response_model=ProductList)
+async def list_product(current_user=Depends(is_seller)):
     try:
-        product_category = get_product_category()
-        product_items = [GetProductcategory(
-            id = str(item.get('_id')),
-            productName=item.get('productName'),
-            productType=item.get('productType'),
-            productImageURL=item.get('productImageURL'),
-            createdAt=str(item.get('createdAt'))
-        ) for item in product_category]
-        return GetProductCategoryList(items=product_items)
+        products = get_product({'seller_id':current_user.get('id')})
+        product_image_mapper={}
+        product_to_list = []
+        for product in products:
+            if product_image_mapper.get(product.get('product_name')) == None:
+                product_category_detals = get_each_product_category(
+                    {
+                        'productName':product.get('product_name')
+                    }
+                )
+                product_image_mapper[product.get('product_name')] = product_category_detals[0].get('productImageURL')
+            product_to_list.append(DispalyProduct(
+                id = str(product.get('_id')),
+                product_name = product.get('product_name'),
+                product_image_url = product_image_mapper.get(product.get('product_name')),
+                max_available_quantity_in_kg = product.get('max_available_quantity_in_kg'),
+                Price_per_kg = product.get('Price_per_kg'),
+                createdAt = str(product.get('createdAt'))
+            ))
+        return ProductList(items = product_to_list)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500,detail=str(e))
 
-
-@router.patch('/')
-async def edit_product_category(product_category_id: str,
-                                product_type_to_update: UpdateProductCategory,
-                                current_user=Depends(is_seller)):
+@router.patch('/{product_id}')
+async def update_product_details(product_id:str,update_details:UpdateProduct,
+    current_user=Depends(is_seller)):
     try:
-        import pdb;pdb.set_trace()
-        product_type_to_update = dict(product_type_to_update)
-        product_type_to_update = {k: v for k, v in product_type_to_update.items() if v is not None}
-        update_product_category({'_id': ObjectId(product_category_id)}, product_type_to_update)
-        return {'Message': 'Product updated'}
+        update_product({'_id':ObjectId(product_id),'seller_id':current_user.get('id')},dict(update_details))
+        return {'message':'product details uploaded successfully'}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500,detail=str(e))
 
-
-@router.delete('/')
-async def remove_product_category(product_category_id: str, current_user=Depends(is_seller)):
+@router.delete('/{product_id}')
+async def remove_product(product_id:str,current_user=Depends(is_seller)):
     try:
-        delete_product_category({'_id': ObjectId(product_category_id)})
-        return {'message': 'product category removed successfully'}
+        id = delete_product({'_id':ObjectId(product_id),'seller_id':current_user.get('id')})
+        if id:
+            return {"message":"product removed successfully"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500,detail=str(e))

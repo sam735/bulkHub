@@ -94,3 +94,20 @@ def update_product_category(query:Dict, payload:Dict):
 
 def delete_product_category(query:Dict):
     return db.product_category.remove(query)
+
+def insert_product(product_details:Dict):
+    product_details['createdAt'] = datetime.now()
+    return db.product.insert(product_details)
+
+def get_product(query):
+    return list(db.product.find(query))
+
+def update_product(query:Dict, payload:Dict):
+    payload['updatedAt'] = datetime.now()
+    update_dict = {
+        '$set': payload
+    }
+    return db.product.update(query, update_dict)
+
+def delete_product(query:Dict):
+    return db.product.remove(query)
