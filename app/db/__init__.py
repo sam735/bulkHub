@@ -111,3 +111,13 @@ def update_product(query:Dict, payload:Dict):
 
 def delete_product(query:Dict):
     return db.product.remove(query)
+
+def insert_cart_items(cart_item:Dict):
+    cart_item['createdAt'] = datetime.now()
+    return db.cart.insert(cart_item)
+
+def get_user_cart(query:Dict):
+    return list(db.cart.find(query))
+
+def update_cart_items(query:Dict,update_dict:Dict):
+    db.cart.update(query,update_dict)

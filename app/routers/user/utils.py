@@ -23,3 +23,11 @@ async def is_seller(current_user = Depends(get_current_user)):
             detail="Invalid roles user need to be register as seller first",
         )
     return current_user
+
+async def is_buyer(current_user = Depends(get_current_user)):
+    if current_user.get('role') != 'buyer':
+        raise HTTPException(
+            status_code=403,
+            detail="Invalid roles user need to be register as seller first",
+        )
+    return current_user
